@@ -9,7 +9,7 @@ SendMode Input
 Gui Add, Button, gGuiClose x8 y234 w80 h23 +Default, &Exit
 Gui Add, StatusBar,
 Gui Add, ListView, x8 y8 w300 h150 -LV0x10 +NoSortHdr +Disabled, Signature Types|# scanned
-Gui Add, Hotkey, hWndhmsctls_hotkey321 vhotkey gHotkeyChange x104 y220 w196 h21 Limit128, #
+Gui Add, Hotkey, hWndhmsctls_hotkey321 vhkey gHotkeyChange x104 y220 w196 h21 Limit128, #
 Gui Add, Text, x8 y166 w300 h30, NOTE: Other signatures (WH's, Combat, ...) will not be pasted ingame.
 Gui Add, GroupBox, x96 y204 w212 h83, Hotkey
 Gui Add, Text, x104 y249 w196 h30, Change hotkey to desired key. Starts with '#' as default.
@@ -41,12 +41,21 @@ GuiEscape:
 GuiClose:
     ExitApp
 
+;added delays because CCP and stuff
 execute:
 clipboard =
-Send {Ctrl down}c{Ctrl up}
+Send {Ctrl down}
+Sleep 150
+Send c
+Sleep 150
+Send {Ctrl up}
 Sleep 150
 clipboard := proc_string(clipboard)
-Send {Ctrl down}v{Ctrl up}
+Send {Ctrl down}
+Sleep 150
+Send v
+Sleep 150
+Send {Ctrl up}
 Sleep 150
 Return
 
@@ -116,6 +125,5 @@ proc_string(copied_string){
         
     }
 }
-
 
 
