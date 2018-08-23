@@ -39,7 +39,7 @@ Return
 
 GuiEscape:
 GuiClose:
-    ExitApp
+	ExitApp
 
 ;added delays because CCP and stuff
 execute:
@@ -50,6 +50,7 @@ Send c
 Sleep 150
 Send {Ctrl up}
 Sleep 150
+mapper := mapper_String(clipboard)
 clipboard := proc_string(clipboard)
 Send {Ctrl down}
 Sleep 150
@@ -57,73 +58,113 @@ Send v
 Sleep 150
 Send {Ctrl up}
 Sleep 150
+clipboard := mapper
 Return
 
 
 
 HotkeyChange(){
-    global hkey
-    global prev_hkey
-    Hotkey %prev_hkey%, execute, Off
-    if hkey in +,^,!,+^,+!,^!
-        return
-    if (hkey = "")
-        return
-    Hotkey %hkey%, execute, On
-    prev_hkey := hkey
+	global hkey
+	global prev_hkey
+	Hotkey %prev_hkey%, execute, Off
+	if hkey in +,^,!,+^,+!,^!
+		return
+	if (hkey = "")
+		return
+	Hotkey %hkey%, execute, On
+	prev_hkey := hkey
 }
 
 
 
-proc_string(copied_string){
+
+mapper_string(copied_string){
+	formatted_string := proc_string(copied_string,false)
+	RegExMatch(formatted_string, "O)([a-zA-Z]{1,2})\s\[[a-zA-Z]{3}\]\s[a-zA-Z]+",ret_formatted_string)
+	RegExMatch(copied_string, "O)([a-zA-Z]{3}-\d{3})\s([\w\s]+)",ret_copied_string)
+
+	if(ret_formatted_string.value(1)="R" or ret_formatted_string.value(1)="NR"){
+		ret := ret_copied_string.value(1)
+		ret .= "`tCosmic Signature`tRelic Site`t"
+		ret .= ret_copied_string.value(2)
+		ret .= "`t100,0`%`t1,00 AU"
+		return ret
+	}else if(ret_formatted_string.value(1)="D" or ret_formatted_string.value(1)="ND"){
+		ret := ret_copied_string.value(1)
+		ret .= "`tCosmic Signature`tData Site`t"
+		ret .= ret_copied_string.value(2)
+		ret .= "`t100,0`%`t1,00 AU"
+		return ret
+	}else if(ret_formatted_string.value(1)="G"){
+		ret := ret_copied_string.value(1)
+		ret .= "`tCosmic Signature`tGas Site`t"
+		ret .= ret_copied_string.value(2)
+		ret .= "`t100,0`%`t1,00 AU"
+		return ret
+	}else{
+		return
+	}
+}
+
+proc_string(copied_string,increment=true){
 	if InStr(copied_string, "Unsecured"){
 
 		RegExMatch(copied_string, "O)([a-zA-Z]{3})-\d{3}\s(?>\w+\s){2}([\w\s]+)", ret)
-        SB_SetText("D [" . ret.value(1) . "] " . ret.value(2),2)
-        LV_GetText(lv_current_num,1,2)
-        LV_Modify(1,"Col2",lv_current_num+1)
+		if(increment){
+			SB_SetText("D [" . ret.value(1) . "] " . ret.value(2),2)
+			LV_GetText(lv_current_num,1,2)
+			LV_Modify(1,"Col2",lv_current_num+1)
+		}
 		return "D [" . ret.value(1) . "] " . ret.value(2)
 
 	} else if InStr(copied_string, "Forgotten"){
 
 		RegExMatch(copied_string, "O)([a-zA-Z]{3})-\d{3}\s(?>\w+\s){2}([\w\s]+)", ret)
-        SB_SetText("R [" . ret.value(1) . "] " . ret.value(2),2)
-        LV_GetText(lv_current_num,2,2)
-        LV_Modify(2,"Col2",lv_current_num+1)
-        return "R [" . ret.value(1) . "] " . ret.value(2)
+		if(increment){
+			SB_SetText("R [" . ret.value(1) . "] " . ret.value(2),2)
+			LV_GetText(lv_current_num,2,2)
+			LV_Modify(2,"Col2",lv_current_num+1)
+		}
+		return "R [" . ret.value(1) . "] " . ret.value(2)
 
 	} else if InStr(copied_string, "Reservoir"){
 
 		RegExMatch(copied_string, "O)([a-zA-Z]{3})-\d{3}\s([\w]+)[\s\w]+", ret)
-        SB_SetText("G [" . ret.value(1) . "] " . ret.value(2),2)
-        LV_GetText(lv_current_num,3,2)
-        LV_Modify(3,"Col2",lv_current_num+1)
-        return "G [" . ret.value(1) . "] " . ret.value(2)
+		if(increment){
+			SB_SetText("G [" . ret.value(1) . "] " . ret.value(2),2)
+			LV_GetText(lv_current_num,3,2)
+			LV_Modify(3,"Col2",lv_current_num+1)
+		}
+		return "G [" . ret.value(1) . "] " . ret.value(2)
 
 	} else if InStr(copied_string, "Central"){
 
 		RegExMatch(copied_string, "O)([a-zA-Z]{3})-\d{3}\sCentral\s(Serpentis|Blood Raider|Guristas|Angel|Sansha)[\s\w]+", ret)
-        SB_SetText("ND [" . ret.value(1) . "] " . ret.value(2),2)
-        LV_GetText(lv_current_num,4,2)
-        LV_Modify(4,"Col2",lv_current_num+1)
-        return "ND [" . ret.value(1) . "] " . ret.value(2)
+		if(increment){
+			SB_SetText("ND [" . ret.value(1) . "] " . ret.value(2),2)
+			LV_GetText(lv_current_num,4,2)
+			LV_Modify(4,"Col2",lv_current_num+1)
+		}
+		return "ND [" . ret.value(1) . "] " . ret.value(2)
 
 	} else if InStr(copied_string, "Ruined"){
 
 		RegExMatch(copied_string, "O)([a-zA-Z]{3})-\d{3}\sRuined\s(Serpentis|Blood Raider|Guristas|Angel|Sansha)[\s\w]+", ret)
-        SB_SetText("NR [" . ret.value(1) . "] " . ret.value(2),2)
-        LV_GetText(lv_current_num,5,2)
-        LV_Modify(5,"Col2",lv_current_num+1)
-        return "NR [" . ret.value(1) . "] " . ret.value(2)
+		if(increment){
+			SB_SetText("NR [" . ret.value(1) . "] " . ret.value(2),2)
+			LV_GetText(lv_current_num,5,2)
+			LV_Modify(5,"Col2",lv_current_num+1)
+		}
+		return "NR [" . ret.value(1) . "] " . ret.value(2)
 
 	} else {
-    
-        RegExMatch(copied_string, "O)([a-zA-Z]{3})-\d{3}([\s\w]+)", ret)
-        SB_SetText("OTHER [" . ret.value(1) . "] " . ret.value(2),2)
-        LV_GetText(lv_current_num,6,2)
-        LV_Modify(6,"Col2",lv_current_num+1) 
-        
-    }
+	
+		RegExMatch(copied_string, "O)([a-zA-Z]{3})-\d{3}([\s\w]+)", ret)
+		if(increment){
+			SB_SetText("OTHER [" . ret.value(1) . "] " . ret.value(2),2)
+			LV_GetText(lv_current_num,6,2)
+			LV_Modify(6,"Col2",lv_current_num+1)
+		}
+		
+	}
 }
-
-
